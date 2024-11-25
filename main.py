@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 import time
 import openpyxl
 import requests
-from time_script import get_time_script
+from utils import get_time_script
 
 @get_time_script
 def main():
