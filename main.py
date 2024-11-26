@@ -1,6 +1,6 @@
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
 import requests
 from utils import get_time_script, save_data
 

@@ -1,6 +1,7 @@
 import time
-import openpyxl
 import re
+import openpyxl
+
 
 def get_time_script(fun):
     def wrapper(*args, **kwargs):
@@ -25,18 +26,30 @@ def save_data(data_to_save, url):
     workbook = openpyxl.Workbook()
     sheet = workbook.active
     sheet.title = "Error"
-                    
+
     # Заголовки столбцов
-    headers = ["Основная статья", "Ссылка на основную статью", "Ошибка", "Текст ссылки в основной статье", "Неработающая ссылка"]
+    headers = [
+        "Основная статья",
+        "Ссылка на основную статью",
+        "Ошибка",
+        "Текст ссылки в основной статье",
+        "Неработающая ссылка"
+        ]
     sheet.append(headers)
-                    
+
     # Запись данных
     for data in data_to_save:
-        sheet.append([data["Основная статья"], data["Ссылка на основную статью"], data["Ошибка"], data["Текст ссылки в основной статье"], data["Неработающая ссылка"]])
+        sheet.append([
+            data["Основная статья"],
+            data["Ссылка на основную статью"],
+            data["Ошибка"],
+            data["Текст ссылки в основной статье"],
+            data["Неработающая ссылка"]
+            ])
     cleaned_url = clean_filename(url)
     # Определение имени файла в зависимости от URL
     filename = f"error{cleaned_url}.xlsx"
-                   
+
     # Сохранение файла
     workbook.save(filename)
     print(f"Данные успешно сохранены в файл {filename}")
