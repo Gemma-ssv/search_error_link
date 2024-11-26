@@ -21,9 +21,20 @@ cleaned_url = clean_filename('https://example.com/path/to/page')
 save_data(data_to_save, cleaned_url)
 """
 import time
+import threading
 import re
 import openpyxl
 
+
+# Добавляем блокировку для синхронизации вывода в консоль
+console_lock = threading.Lock()
+
+def print_slowly(text, delay=0.05):
+    with console_lock:
+        for char in text:
+            print(char, end='', flush=True)
+            time.sleep(delay)
+        print()
 
 def get_time_script(fun):
     """
@@ -45,13 +56,17 @@ def get_time_script(fun):
         minutes, seconds = divmod(elapsed_time, 60)
 
         # Выводим время выполнения в консоль
-        print(f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд")
-
+        time_script_text = f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд"
+        print_slowly(time_script_text)
         # Выводим сообщения о закрытии программы через 5, 4, 3, 2, 1 секунд
         for i in range(5, 0, -1):
-            print(f"Закрытие через {i}...")
+            end_time_script_text = f"Закрытие через {i}..."
+            print_slowly(end_time_script_text)
             time.sleep(1)
-        print("Закрытие программы.")
+        end_script_text = "Закрытие программы."
+        print_slowly(end_script_text)
+        by_text = "by \\SSV/"
+        print_slowly(by_text)
 
         return result
     return wrapper
@@ -112,7 +127,8 @@ def save_data(data_to_save, url):
 
     # Сохранение файла
     workbook.save(filename)
-    print(f"Данные успешно сохранены в файл {filename}")
+    save_data_text = f"Данные успешно сохранены в файл {filename}"
+    print_slowly(save_data_text)
 
 def is_valid_url(url_input):
     """
@@ -143,19 +159,18 @@ def print_choice(urls: list) -> list:
         list: Возвращает список ссылок, которые ввёл пользователь.
     """
     while True:
-        print(
-            "Введите ссылку в формате - https://домен/путь/\n"
+        example_text = ("Введите ссылку в формате - https://домен/путь/\n"
             "Например - https://gemma.by/news/\n"
             "Нажмите - Enter.")
+        print_slowly(example_text)
         url_input = input()
 
         if is_valid_url(url_input):
             urls.append(url_input)
             while True:
-                print(
-                    "Выполнить поиск? Введите `да` или `нет`.\n"
-                    "Если `нет`, то можно будет добавить еще ссылку."
-                    )
+                choice_text = ("Выполнить поиск? Введите `да` или `нет`.\n"
+                    "Если `нет`, то можно будет добавить еще ссылку.")
+                print_slowly(choice_text)
                 next_input = input().lower()
 
                 if next_input == 'да':
@@ -163,13 +178,31 @@ def print_choice(urls: list) -> list:
                 if next_input == 'нет':
                     break
                 else:
-                    print("Неправильные ответ. Требуется ввести `да` или `нет`.")
+                    wrong_answer_text = "Неправильные ответ. Требуется ввести `да` или `нет`."
+                    print_slowly(wrong_answer_text)
                     continue
 
             if next_input == 'да':
-                print("Дождитесь окончания выполнения программы.")
+                answer_yes_text = "Дождитесь окончания выполнения программы."
+                print_slowly(answer_yes_text)
                 break
         else:
-            print("Вы ввели неправильный формат ссылки. Попробуйте еще раз.")
+            wrong_link_text = "Вы ввели неправильный формат ссылки. Попробуйте еще раз."
+            print_slowly(wrong_link_text)
             continue
     return urls
+
+def animate_search(stop_event):
+    dots = 0
+    while not stop_event.is_set():
+        with console_lock:
+            if dots == 0:
+                print("\rВеду поиск", end='', flush=True)
+            elif dots == 1:
+                print("\rВеду поиск.", end='', flush=True)
+            elif dots == 2:
+                print("\rВеду поиск..", end='', flush=True)
+            elif dots == 3:
+                print("\rВеду поиск...", end='', flush=True)
+        dots = (dots + 1) % 4
+        time.sleep(0.5)
