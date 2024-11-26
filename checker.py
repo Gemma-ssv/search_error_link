@@ -1,7 +1,9 @@
 """Модуль для проверки ссылок на веб-страницах.
 
-Этот модуль содержит класс `LinkChecker`, который использует Selenium WebDriver для автоматизации браузера
-и проверки доступности ссылок на указанных веб-страницах. Результаты проверки сохраняются в Excel файл.
+Этот модуль содержит класс `LinkChecker`, который использует
+Selenium WebDriver для автоматизации браузера
+и проверки доступности ссылок на указанных веб-страницах.
+Результаты проверки сохраняются в Excel файл.
 
 Основные функции:
 - Проверка ссылок на новостях на указанных URL-адресах.
@@ -137,10 +139,9 @@ class LinkChecker:
             EC.presence_of_element_located((By.CLASS_NAME, "rt1"))
         ).text
 
-        link_list = WebDriverWait(browser, 10).until(
-            EC.presence_of_all_elements_located((By.TAG_NAME, "a"))
-        )
-
+        link_list = browser.find_elements(By.TAG_NAME, "article")
+        link_list = link_list[0].find_elements(By.TAG_NAME, "a")
+        
         for l_l in link_list:
             l_l_text = l_l.text
             href_checklink = l_l.get_attribute('href')
