@@ -46,6 +46,13 @@ def get_time_script(fun):
 
         # Выводим время выполнения в консоль
         print(f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд")
+
+        # Выводим сообщения о закрытии программы через 5, 4, 3, 2, 1 секунд
+        for i in range(5, 0, -1):
+            print(f"Закрытие через {i}...")
+            time.sleep(1)
+        print("Закрытие программы.")
+
         return result
     return wrapper
 
@@ -107,3 +114,45 @@ def save_data(data_to_save, url):
     # Сохранение файла
     workbook.save(filename)
     print(f"Данные успешно сохранены в файл {filename}")
+
+def is_valid_url(url_input):
+    # Регулярное выражение для проверки URL
+    pattern = r'^https://[\w\-\.]+/[\w\-]+/$'
+
+    # Проверка соответствия URL регулярному выражению
+    if re.match(pattern, url_input):
+        return True
+    else:
+        return False
+
+def print_choice(urls: list) -> list:
+    while True:
+        print(
+            "Эта программа, предназначен для поиска неработающих ссылок в новостях магазина.\n"
+            "Для того, чтобы начать поиск введите ссылку в формате - https://домен/путь/\n"
+            "Например - https://gemma.by/news/"
+            )
+        url_input = input()
+        
+        if is_valid_url(url_input):
+            urls.append(url_input)
+            
+            while True:
+                print("Выполнить поиск? Введите `да` или `нет`. Если `нет`, то можно будет добавить еще ссылку.")
+                next_input = input().lower()
+                
+                if next_input == 'да':
+                    break
+                if next_input == 'нет':
+                    break
+                else:
+                    print("Неправильные ответ. Требуется ввести `да` или `нет`.")
+                    continue
+            
+            if next_input == 'да':
+                print("Дождитесь окончания выполнения программы.")
+                break
+        else:
+            print("Вы ввели неправильный формат ссылки. Попробуйте еще раз.")
+            continue
+    return urls
