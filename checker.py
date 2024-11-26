@@ -189,4 +189,4 @@ class LinkChecker:
 
         browser.close()
         browser.switch_to.window(window_handles[0])
-            
+          

@@ -145,7 +145,7 @@ def print_choice(urls: list) -> list:
     while True:
         print(
             "Введите ссылку в формате - https://домен/путь/\n"
-            "Например - https://gemma.by/news/"
+            "Например - https://gemma.by/news/\n"
             "Нажмите - Enter.")
         url_input = input()
 
