@@ -11,7 +11,7 @@ python main.py
 ```
 """
 from checker import LinkChecker
-from utils import get_time_script, print_choice
+from utils import get_time_script, print_choice, print_slowly
 
 @get_time_script
 def main():
@@ -23,14 +23,13 @@ def main():
     - Запускает процесс проверки ссылок.
     - Результаты проверки сохраняются в Excel файл.
     """
-    print(
-        "Эта программа, предназначен для поиска неработающих ссылок в новостях и полезных советах магазина.\n"       
-        )
+    hello_text = "Эта программа, предназначен для поиска неработающих ссылок в новостях и полезных советах магазина.\n"
+    print_slowly(hello_text)
     urls = []
     urls = print_choice(urls)
     checker = LinkChecker(urls)
     checker.check_links()
-    print("by \\SSV/")
+    
 
 if __name__ == "__main__":
     main()
