@@ -50,6 +50,21 @@ class LinkChecker:
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument('--headless=new')
 
+
+    def set_logs(self, error: str) -> None:
+        """
+        Записывает информацию об ошибках в файл error_logs.txt.
+
+        Параметры:
+            phone (str): Номер телефона, на который было отправлено сообщение.
+            message (str): Текст отправленного сообщения.
+            response (str): Ответ от сервера или сообщение об ошибке.
+        """
+        with open('error_logs.txt', 'a', encoding='utf-8') as f:
+            f.write(
+                f"Ошибка: {error}\n"
+            )
+
     def check_links(self):
         """
         Основной метод для проверки ссылок на указанных URL-адресах.
@@ -70,10 +85,14 @@ class LinkChecker:
                     if self.data_to_save:
                         save_data(self.data_to_save, url)
                     else:
+                        error_message: str = "Нет данных для сохранения."
+                        self.set_logs(error_message)
                         print("Нет данных для сохранения.")
         # pylint: disable=broad-exception-caught
         except Exception as e:
-            print(f"Произошла ошибка: {e}")
+            error_message: str = f"Произошла ошибка: {e}.\n"
+            self.set_logs(error_message)
+            print(f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt.")
 
     def _process_page(self, browser):
         """
@@ -96,8 +115,8 @@ class LinkChecker:
                     self._process_news(browser, n_l)
                 # pylint: disable=broad-exception-caught
                 except Exception as e2:
-                    print(f"Ошибка при обработке новости: {e2}")
-                    print(n_l.text)
+                    error_message: str = f"Ошибка при обработке новости: {e2}\n{n_l.text}"
+                    self.set_logs(error_message)
                     continue
 
             # Проверка наличия следующей страницы
@@ -156,13 +175,6 @@ class LinkChecker:
                         "Текст ссылки в основной статье": l_l_text,
                         "Неработающая ссылка": href_checklink
                     })
-                    print(f"Основная статья: {h1_link_list},\n"
-                          f"Ссылка на основную статью: {href},\n"
-                          f"Ошибка: {response.status_code},\n"
-                          f"Текст ссылки в основной статье: {l_l_text},\n"
-                          f"Неработающая ссылка: {href_checklink}")
-                else:
-                    print('Элемент не найден - Всё хорошо')
             # pylint: disable=broad-exception-caught
             except Exception as e:
                 self.data_to_save.append({
@@ -172,7 +184,9 @@ class LinkChecker:
                     "Текст ссылки в основной статье": l_l_text,
                     "Неработающая ссылка": href_checklink
                 })
-                print(e)
+                error_message: str = f"Некорректная ссылка - {e}"
+                self.set_logs(error_message)
 
         browser.close()
         browser.switch_to.window(window_handles[0])
+            
