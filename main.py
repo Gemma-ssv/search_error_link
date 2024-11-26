@@ -11,7 +11,7 @@ python main.py
 ```
 """
 from checker import LinkChecker
-from utils import get_time_script
+from utils import get_time_script, print_choice
 
 @get_time_script
 def main():
@@ -23,8 +23,8 @@ def main():
     - Запускает процесс проверки ссылок.
     - Результаты проверки сохраняются в Excel файл.
     """
-
-    urls = ['https://example.com/news/']
+    urls = []
+    urls = print_choice(urls)
     checker = LinkChecker(urls)
     checker.check_links()
 

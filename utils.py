@@ -73,8 +73,7 @@ def clean_filename(url):
 def save_data(data_to_save, url):
     """
     Сохраняет данные о неработающих ссылках в Excel файл.
-    Copy
-
+    
     Аргументы:
     data_to_save (list): Список словарей с данными о неработающих ссылках.
     url (str): URL-адрес, используемый для формирования имени файла.
@@ -116,6 +115,14 @@ def save_data(data_to_save, url):
     print(f"Данные успешно сохранены в файл {filename}")
 
 def is_valid_url(url_input):
+    """
+    Проверяет валидность ссылки. 
+    Аргументы:
+        url_input (str): Ссылка, которую пользователь ввел через консоль.
+
+    Возвращает:
+        bool: Правильный формат или неправильный формат ссылки.
+    """
     # Регулярное выражение для проверки URL
     pattern = r'^https://[\w\-\.]+/[\w\-]+/$'
 
@@ -126,6 +133,15 @@ def is_valid_url(url_input):
         return False
 
 def print_choice(urls: list) -> list:
+    """
+    Выводит информацию о программе. Запрашивает у пользователя ссылки.
+
+    Args:
+        urls (list): Получает пустой список, в который будут записаны ссылки.
+
+    Returns:
+        list: Возвращает список ссылок, которые ввёл пользователь.
+    """
     while True:
         print(
             "Эта программа, предназначен для поиска неработающих ссылок в новостях магазина.\n"
@@ -133,14 +149,16 @@ def print_choice(urls: list) -> list:
             "Например - https://gemma.by/news/"
             )
         url_input = input()
-        
+
         if is_valid_url(url_input):
             urls.append(url_input)
-            
             while True:
-                print("Выполнить поиск? Введите `да` или `нет`. Если `нет`, то можно будет добавить еще ссылку.")
+                print(
+                    "Выполнить поиск? Введите `да` или `нет`.\n"
+                    "Если `нет`, то можно будет добавить еще ссылку."
+                    )
                 next_input = input().lower()
-                
+
                 if next_input == 'да':
                     break
                 if next_input == 'нет':
@@ -148,7 +166,7 @@ def print_choice(urls: list) -> list:
                 else:
                     print("Неправильные ответ. Требуется ввести `да` или `нет`.")
                     continue
-            
+
             if next_input == 'да':
                 print("Дождитесь окончания выполнения программы.")
                 break
