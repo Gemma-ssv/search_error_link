@@ -24,7 +24,7 @@ def main():
     - Результаты проверки сохраняются в Excel файл.
     """
 
-    urls = ['https://gemma.by/soveti/']
+    urls = ['https://example.com/news/']
     checker = LinkChecker(urls)
     checker.check_links()
 
