@@ -1,9 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-import openpyxl
 import requests
-from utils import get_time_script
+from utils import get_time_script, save_data
 
 @get_time_script
 def main():
@@ -109,42 +108,12 @@ def main():
 
                 # Создание Excel файла и запись данных для текущей страницы
                 if data_to_save:
-                    workbook = openpyxl.Workbook()
-                    sheet = workbook.active
-                    sheet.title = "Error"
-                    
-                    # Заголовки столбцов
-                    headers = ["Основная статья", "Ссылка на основную статью", "Ошибка", "Текст ссылки в основной статье", "Неработающая ссылка"]
-                    sheet.append(headers)
-                    
-                    # Запись данных
-                    for data in data_to_save:
-                        sheet.append([data["Основная статья"], data["Ссылка на основную статью"], data["Ошибка"], data["Текст ссылки в основной статье"], data["Неработающая ссылка"]])
-                    
-                    # Определение имени файла в зависимости от URL
-                    if url == 'https://gemma.by/news/':
-                        filename = "errornews.xlsx"
-                    elif url == 'https://gemma.by/soveti/':
-                        filename = "errorsoveti.xlsx"
-                    else:
-                        filename = "error.xlsx"
-                    
-                    # Сохранение файла
-                    workbook.save(filename)
-                    print(f"Данные успешно сохранены в файл {filename}")
+                    save_data(data_to_save, url)
+
                 else:
                     print("Нет данных для сохранения.")
     except Exception as e:
         print(f"Произошла ошибка: {e}")
-    # finally:
-    #     # Засекаем время окончания выполнения скрипта
-    #     end_time = time.time()
-    #     # Вычисляем время выполнения в минутах и секундах
-    #     elapsed_time = end_time - start_time
-    #     minutes, seconds = divmod(elapsed_time, 60)
-
-    #     # Выводим время выполнения в консоль
-    #     print(f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд")
 
 if __name__ == "__main__":
     main()
