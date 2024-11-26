@@ -23,8 +23,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import requests
+import threading
 
-from utils import save_data
+from utils import animate_search, print_slowly, save_data
 
 
 class LinkChecker:
@@ -64,7 +65,7 @@ class LinkChecker:
             f.write(
                 f"Ошибка: {error}\n"
             )
-
+            
     def check_links(self):
         """
         Основной метод для проверки ссылок на указанных URL-адресах.
@@ -74,6 +75,10 @@ class LinkChecker:
         - Проходит по каждому URL-адресу и вызывает метод _process_page для обработки страницы.
         - Сохраняет данные о неработающих ссылках в Excel файл.
         """
+        stop_event = threading.Event()
+        animation_thread = threading.Thread(target=animate_search, args=(stop_event,))
+        animation_thread.start()
+
         try:
             with webdriver.Chrome(options=self.options) as browser:
                 for url in self.urls:
@@ -87,12 +92,17 @@ class LinkChecker:
                     else:
                         error_message: str = "Нет данных для сохранения."
                         self.set_logs(error_message)
-                        print("Нет данных для сохранения.")
+                        no_data_text = "Нет данных для сохранения."
+                        print_slowly(no_data_text)
         # pylint: disable=broad-exception-caught
         except Exception as e:
             error_message: str = f"Произошла ошибка: {e}.\n"
             self.set_logs(error_message)
-            print(f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt.")
+            error_text = f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt."
+            print_slowly(error_text)
+        finally:
+            stop_event.set()
+            animation_thread.join()
 
     def _process_page(self, browser):
         """
@@ -129,11 +139,13 @@ class LinkChecker:
                     next_page_link.click()
                     WebDriverWait(browser, 10).until(EC.staleness_of(news_list[0]))
                 else:
-                    print("Следующая страница не найдена, переход к следующей ссылке")
+                    next_page_text = "Следующая страница не найдена, переход к следующей ссылке"
+                    print_slowly(next_page_text)
                     break
             # pylint: disable=broad-exception-caught
             except Exception:
-                print("Конец парсинга.")
+                end_parsing_text = "Конец парсинга."
+                print_slowly(end_parsing_text)
                 break
 
     def _process_news(self, browser, news_link):
@@ -160,7 +172,7 @@ class LinkChecker:
 
         link_list = browser.find_elements(By.TAG_NAME, "article")
         link_list = link_list[0].find_elements(By.TAG_NAME, "a")
-        
+
         for l_l in link_list:
             l_l_text = l_l.text
             href_checklink = l_l.get_attribute('href')
@@ -189,4 +201,3 @@ class LinkChecker:
 
         browser.close()
         browser.switch_to.window(window_handles[0])
-          
