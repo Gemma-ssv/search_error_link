@@ -29,6 +29,7 @@ import time
 import threading
 import re
 import openpyxl
+import validators
 
 
 # Добавляем блокировку для синхронизации вывода в консоль
@@ -163,14 +164,7 @@ def is_valid_url(url_input):
     Возвращает:
         bool: Правильный формат или неправильный формат ссылки.
     """
-    # Регулярное выражение для проверки URL
-    pattern = r'^https://[\w\-\.]+/[\w\-]+/$'
-
-    # Проверка соответствия URL регулярному выражению
-    if re.match(pattern, url_input):
-        return True
-    else:
-        return False
+    return validators.url(url_input)
 
 def print_choice(urls: list) -> list:
     """
@@ -185,7 +179,8 @@ def print_choice(urls: list) -> list:
     while True:
         example_text = ("Введите ссылку в формате - https://домен/путь/\n"
             "Например - https://gemma.by/news/\n"
-            "После ввода нажмите - Enter.")
+            "Или например с параметром - https://gemma.by/news/?page=2\n"
+            "После ввода нажмите - Enter.\n")
         print_slowly(example_text)
         url_input = input().strip()
 
@@ -193,7 +188,7 @@ def print_choice(urls: list) -> list:
             urls.append(url_input)
             while True:
                 choice_text = ("Выполнить поиск? Введите `да` или `нет`.\n"
-                    "Если `нет`, то можно будет добавить еще ссылку.")
+                    "Если `нет`, то можно будет добавить еще ссылку.\n")
                 print_slowly(choice_text)
                 next_input = input().lower().strip()
 
@@ -202,16 +197,16 @@ def print_choice(urls: list) -> list:
                 if next_input == 'нет':
                     break
                 else:
-                    wrong_answer_text = "Неправильные ответ. Требуется ввести `да` или `нет`."
+                    wrong_answer_text = "Неправильные ответ. Требуется ввести `да` или `нет`.\n"
                     print_slowly(wrong_answer_text)
                     continue
 
             if next_input == 'да':
-                answer_yes_text = "Дождитесь окончания выполнения программы."
+                answer_yes_text = "Дождитесь окончания выполнения программы.\n"
                 print_slowly(answer_yes_text)
                 break
         else:
-            wrong_link_text = "Вы ввели неправильный формат ссылки. Попробуйте еще раз."
+            wrong_link_text = "Вы ввели неправильный формат ссылки. Попробуйте еще раз.\n"
             print_slowly(wrong_link_text)
             continue
     return urls
