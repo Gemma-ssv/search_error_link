@@ -1,34 +1,42 @@
 """
 Основной модуль для запуска проверки ссылок на веб-страницах.
 
-Этот модуль содержит функцию `main`, которая 
-инициализирует объект `LinkChecker` и запускает процесс проверки ссылок.
-Проверка выполняется для указанных URL-адресов, и результаты сохраняются в Excel файл.
+Этот модуль содержит функцию `main`, которая инициализирует объект `LinkChecker`
+и запускает процесс проверки ссылок. Проверка выполняется для указанных URL-адресов,
+и результаты сохраняются в Excel файл.
 
 Пример использования:
-```python
+```bash
 python main.py
-```
+
 """
+
+from concurrent.futures import ThreadPoolExecutor
 from checker import LinkChecker
-from utils import get_time_script, print_choice, print_slowly
+from utils import print_choice, get_time_script
+
 
 @get_time_script
 def main():
     """
-    Основная функция для запуска проверки ссылок.
+    Запускает процесс проверки ссылок на веб-страницах.
+    Copy
 
-    Описание:
-    - Инициализирует объект `LinkChecker` с указанными URL-адресами.
-    - Запускает процесс проверки ссылок.
-    - Результаты проверки сохраняются в Excel файл.
+    Эта функция инициализирует объект `LinkChecker` с указанными URL-адресами,
+    запрашивает выбор пользователя через функцию `print_choice`, и затем
+    использует `ThreadPoolExecutor` для параллельной обработки ссылок.
+    Результаты проверки сохраняются в Excel файл.
+
+    Возвращает:
+        None: Функция ничего не возвращает, она только запускает процесс проверки.
     """
-    hello_text = "Эта программа, предназначен для поиска неработающих ссылок в новостях и полезных советах магазина.\n"
-    print_slowly(hello_text)
     urls = []
     urls = print_choice(urls)
     checker = LinkChecker(urls)
-    checker.check_links()
+
+    # Используем ThreadPoolExecutor для параллельной обработки ссылок
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        executor.map(checker.check_links, urls)
 
 if __name__ == "__main__":
     main()

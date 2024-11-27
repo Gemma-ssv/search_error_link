@@ -30,17 +30,16 @@ class LinkChecker:
     Класс для проверки ссылок на веб-страницах.
 
     Атрибуты:
-    urls (list): Список URL-адресов для проверки.
-    data_to_save (list): Список для хранения данных о неработающих ссылках.
-    options (webdriver.ChromeOptions): Опции для настройки Chrome WebDriver.
+        urls (list): Список URL-адресов для проверки.
+        data_to_save (list): Список для хранения данных о неработающих ссылках.
+        options (webdriver.ChromeOptions): Опции для настройки Chrome WebDriver.
     """
-
     def __init__(self, urls):
         """
         Инициализация объекта LinkChecker.
 
         Аргументы:
-        urls (list): Список URL-адресов для проверки.
+            urls (list): Список URL-адресов для проверки.
         """
         self.urls = urls
         self.data_to_save = []
@@ -58,10 +57,13 @@ class LinkChecker:
         with open('error_logs.txt', 'a', encoding='utf-8') as f:
             f.write(f"Ошибка: {error}\n")
 
-    def check_links(self):
+    def check_links(self, url):
         """
         Основной метод для проверки ссылок на указанных URL-адресах.
 
+        Аргументы:
+            url(str): Строка содержащая ссылку.
+        
         Описание:
         - Инициализирует Chrome WebDriver.
         - Проходит по каждому URL-адресу и вызывает метод _process_page для обработки страницы.
@@ -69,38 +71,30 @@ class LinkChecker:
         """
         try:
             with webdriver.Chrome(options=self.options) as browser:
-                for url in self.urls:
-                    self.data_to_save = []  # Очищаем список данных для каждой новой страницы
-                    browser.get(url)
-                    self._process_page(browser)
+                self.data_to_save = []
+                browser.get(url)
+                self._process_page(browser)
 
-                    # Создание Excel файла и запись данных для текущей страницы
-                    if self.data_to_save:
-                        save_data(self.data_to_save, url)
-                    else:
-                        error_message: str = "Нет данных для сохранения."
-                        self.set_logs(error_message)
-                        no_data_text = "Нет данных для сохранения."
-                        print_slowly(no_data_text)
-        # pylint: disable=broad-exception-caught
-        except Exception as e:
-            error_message: str = f"Произошла ошибка: {e}.\n"
-            self.set_logs(error_message)
-            error_text = f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt."
-            print_slowly(error_text)
+                if self.data_to_save:
+                    save_data(self.data_to_save, url)
+                else:
+                    self.set_logs("Нет данных для сохранения.")
+                    print_slowly("Нет данных для сохранения.")
+        except Exception as e: # pylint: disable=broad-exception-caught
+            self.set_logs(f"Произошла ошибка: {e}.")
+            print_slowly(f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt.")
 
     def _process_page(self, browser):
         """
         Обрабатывает текущую страницу, проверяя ссылки на новостях.
 
         Аргументы:
-        browser (webdriver.Chrome): Экземпляр Chrome WebDriver.
-        url (str): URL текущей страницы.
-
+            browser (webdriver.Chrome): Экземпляр Chrome WebDriver.
+            
         Описание:
-        - Находит все ссылки на новости на текущей странице.
-        - Для каждой новости вызывает метод _process_news для проверки ссылок внутри новости.
-        - Проверяет наличие следующей страницы и переходит на нее, если она существует.
+            - Находит все ссылки на новости на текущей странице.
+            - Для каждой новости вызывает метод _process_news для проверки ссылок внутри новости.
+            - Проверяет наличие следующей страницы и переходит на нее, если она существует.
         """
         stop_event = threading.Event()
         animation_thread = threading.Thread(target=animate_search, args=(stop_event,))
@@ -113,13 +107,10 @@ class LinkChecker:
             for n_l in news_list:
                 try:
                     self._process_news(browser, n_l)
-                # pylint: disable=broad-exception-caught
-                except Exception as e2:
-                    error_message: str = f"Ошибка при обработке новости: {e2}\n{n_l.text}"
-                    self.set_logs(error_message)
+                except Exception as e2: # pylint: disable=broad-exception-caught
+                    self.set_logs(f"Ошибка при обработке новости: {e2}\n{n_l.text}")
                     continue
 
-            # Проверка наличия следующей страницы
             try:
                 pagination = WebDriverWait(browser, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "pagination"))
@@ -131,15 +122,12 @@ class LinkChecker:
                 else:
                     stop_event.set()
                     animation_thread.join()
-                    next_page_text = "Следующая страница не найдена, переход к следующей ссылке\n"
-                    print_slowly(next_page_text)
+                    print_slowly("Следующая страница не найдена, переход к следующей ссылке\n")
                     break
-            # pylint: disable=broad-exception-caught
-            except Exception:
-                end_parsing_text = "Конец парсинга."
+            except Exception as e: # pylint: disable=broad-exception-caught
                 stop_event.set()
                 animation_thread.join()
-                print_slowly(end_parsing_text)
+                self.set_logs(f"Ошибка: {e}")
                 break
 
     def _process_news(self, browser, news_link):
@@ -147,13 +135,13 @@ class LinkChecker:
         Обрабатывает отдельную новость, проверяя ссылки внутри нее.
 
         Аргументы:
-        browser (webdriver.Chrome): Экземпляр Chrome WebDriver.
-        news_link (WebElement): Элемент ссылки на новость.
+            browser (webdriver.Chrome): Экземпляр Chrome WebDriver.
+            news_link (WebElement): Элемент ссылки на новость.
 
         Описание:
-        - Открывает ссылку на новость в новой вкладке.
-        - Находит все ссылки внутри новости и проверяет их доступность.
-        - Сохраняет информацию о неработающих ссылках.
+            - Открывает ссылку на новость в новой вкладке.
+            - Находит все ссылки внутри новости и проверяет их доступность.
+            - Сохраняет информацию о неработающих ссылках.
         """
         href = news_link.get_attribute('href')
         browser.execute_script(f"window.open('{href}', '_blank');")
@@ -181,8 +169,7 @@ class LinkChecker:
                         "Текст ссылки в основной статье": l_l_text,
                         "Неработающая ссылка": href_checklink
                     })
-            # pylint: disable=broad-exception-caught
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-exception-caught
                 self.data_to_save.append({
                     "Основная статья": h1_link_list,
                     "Ссылка на основную статью": href,
@@ -190,8 +177,7 @@ class LinkChecker:
                     "Текст ссылки в основной статье": l_l_text,
                     "Неработающая ссылка": href_checklink
                 })
-                error_message: str = f"Некорректная ссылка - {e}"
-                self.set_logs(error_message)
+                self.set_logs(f"Некорректная ссылка - {e}")
 
         browser.close()
         browser.switch_to.window(window_handles[0])
