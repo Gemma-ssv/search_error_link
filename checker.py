@@ -102,9 +102,17 @@ class LinkChecker:
         animation_thread.start()
 
         while True:
-            news_list = WebDriverWait(browser, 10).until(
-                EC.presence_of_all_elements_located((By.XPATH, "//div[@class='image']/a"))
-            )
+            try:
+                news_list = WebDriverWait(browser, 10).until(
+                    EC.presence_of_all_elements_located((By.XPATH, "//div[@class='image']/a"))
+                )
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                self.set_logs(f"Новости не найдены: {e}")
+                stop_event.set()
+                animation_thread.join()
+                print_slowly("Новости не найдены, переход к следующей ссылке\n")
+                break
+            
             for n_l in news_list:
                 try:
                     self._process_news(browser, n_l)
