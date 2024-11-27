@@ -81,7 +81,7 @@ def get_time_script(fun):
         minutes, seconds = divmod(elapsed_time, 60)
         print_slowly("Конец парсинга.")
         # Выводим время выполнения в консоль
-        time_script_text = f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд\n"
+        time_script_text = f"Время выполнения программы: {int(minutes)} минут {int(seconds)} секунд\n"
         print_slowly(time_script_text)
         # Выводим сообщения о закрытии программы через 5, 4, 3, 2, 1 секунд
         for i in range(5, 0, -1):
@@ -176,11 +176,16 @@ def print_choice(urls: list) -> list:
     Возвращает:
         list: Возвращает список ссылок, которые ввёл пользователь.
     """
+    example_text = (
+        "Введите ссылку в формате - https://домен/путь/\n"
+        "Например - https://gemma.by/news/\n"
+        "Или например с параметром - https://gemma.by/news/?page=2\n"
+        "В любом из форматов программа будет искать все страницы навовостей."
+        "После ввода нажмите - Enter.\n"
+        )
+    print_slowly(example_text)
     while True:
-        example_text = ("Введите ссылку в формате - https://домен/путь/\n"
-            "Например - https://gemma.by/news/\n"
-            "Или например с параметром - https://gemma.by/news/?page=2\n"
-            "После ввода нажмите - Enter.\n")
+        example_text = ("Введите ссылку")
         print_slowly(example_text)
         url_input = input().strip()
 
