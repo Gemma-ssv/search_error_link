@@ -116,10 +116,14 @@ class LinkChecker:
                 pagination = WebDriverWait(browser, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "pagination"))
                 )
-                next_page_link = pagination.find_elements(By.TAG_NAME, "a")[-2]
-                if ">" in next_page_link.text:
-                    next_page_link.click()
-                    WebDriverWait(browser, 10).until(EC.staleness_of(news_list[0]))
+                next_page_link = pagination.find_elements(By.TAG_NAME, "a")
+                for i in next_page_link:
+                    try:
+                        if i.text.isdigit():
+                            i.click()
+                        WebDriverWait(browser, 10).until(EC.staleness_of(news_list[0]))
+                    except Exception as e: # pylint: disable=broad-exception-caught
+                        self.set_logs(f"Активных страниц нет: {e}")
                 else:
                     stop_event.set()
                     animation_thread.join()
