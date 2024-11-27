@@ -69,6 +69,7 @@ class LinkChecker:
         - Проходит по каждому URL-адресу и вызывает метод _process_page для обработки страницы.
         - Сохраняет данные о неработающих ссылках в Excel файл.
         """
+
         try:
             with webdriver.Chrome(options=self.options) as browser:
                 self.data_to_save = []
@@ -148,19 +149,22 @@ class LinkChecker:
         window_handles = browser.window_handles
         browser.switch_to.window(window_handles[-1])
 
+        # h1_link_list = WebDriverWait(browser, 10).until(
+        #     EC.presence_of_element_located((By.CLASS_NAME, "rt1"))
+        # ).text
         h1_link_list = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "rt1"))
+            EC.presence_of_element_located((By.TAG_NAME, "h1"))
         ).text
 
-        link_list = browser.find_elements(By.TAG_NAME, "article")
-        link_list = link_list[0].find_elements(By.TAG_NAME, "a")
+        link_list = browser.find_element(By.ID, "content")
+        link_list = link_list.find_elements(By.TAG_NAME, "a")
 
         for l_l in link_list:
             l_l_text = l_l.text
             href_checklink = l_l.get_attribute('href')
 
             try:
-                response = requests.get(href_checklink, timeout=10)
+                response = requests.get(href_checklink, timeout=30)
                 if response.status_code != 200:
                     self.data_to_save.append({
                         "Основная статья": h1_link_list,
@@ -173,11 +177,11 @@ class LinkChecker:
                 self.data_to_save.append({
                     "Основная статья": h1_link_list,
                     "Ссылка на основную статью": href,
-                    "Ошибка": "Некорректная ссылка",
+                    "Ошибка": "Возможно некорректная ссылка",
                     "Текст ссылки в основной статье": l_l_text,
                     "Неработающая ссылка": href_checklink
                 })
-                self.set_logs(f"Некорректная ссылка - {e}")
+                self.set_logs(f"Возможно некорректная ссылка - {e}")
 
         browser.close()
         browser.switch_to.window(window_handles[0])
