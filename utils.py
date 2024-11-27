@@ -56,7 +56,7 @@ def get_time_script(fun):
         minutes, seconds = divmod(elapsed_time, 60)
 
         # Выводим время выполнения в консоль
-        time_script_text = f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд"
+        time_script_text = f"Время выполнения скрипта: {int(minutes)} минут {int(seconds)} секунд\n"
         print_slowly(time_script_text)
         # Выводим сообщения о закрытии программы через 5, 4, 3, 2, 1 секунд
         for i in range(5, 0, -1):
@@ -127,7 +127,7 @@ def save_data(data_to_save, url):
 
     # Сохранение файла
     workbook.save(filename)
-    save_data_text = f"Данные успешно сохранены в файл {filename}"
+    save_data_text = f"Данные успешно сохранены в файл {filename}\n"
     print_slowly(save_data_text)
 
 def is_valid_url(url_input):
@@ -163,7 +163,7 @@ def print_choice(urls: list) -> list:
             "Например - https://gemma.by/news/\n"
             "Нажмите - Enter.")
         print_slowly(example_text)
-        url_input = input()
+        url_input = input().strip()
 
         if is_valid_url(url_input):
             urls.append(url_input)
@@ -171,7 +171,7 @@ def print_choice(urls: list) -> list:
                 choice_text = ("Выполнить поиск? Введите `да` или `нет`.\n"
                     "Если `нет`, то можно будет добавить еще ссылку.")
                 print_slowly(choice_text)
-                next_input = input().lower()
+                next_input = input().lower().strip()
 
                 if next_input == 'да':
                     break

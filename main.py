@@ -29,7 +29,6 @@ def main():
     urls = print_choice(urls)
     checker = LinkChecker(urls)
     checker.check_links()
-    
 
 if __name__ == "__main__":
     main()

@@ -17,16 +17,13 @@ checker.check_links()
 ```
 """
 
+import threading
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 import requests
-import threading
-
 from utils import animate_search, print_slowly, save_data
-
 
 class LinkChecker:
     """
@@ -51,21 +48,16 @@ class LinkChecker:
         self.options.add_argument('--disable-blink-features=AutomationControlled')
         self.options.add_argument('--headless=new')
 
-
     def set_logs(self, error: str) -> None:
         """
         Записывает информацию об ошибках в файл error_logs.txt.
 
         Параметры:
-            phone (str): Номер телефона, на который было отправлено сообщение.
-            message (str): Текст отправленного сообщения.
-            response (str): Ответ от сервера или сообщение об ошибке.
+            error (str): Текст ошибки.
         """
         with open('error_logs.txt', 'a', encoding='utf-8') as f:
-            f.write(
-                f"Ошибка: {error}\n"
-            )
-            
+            f.write(f"Ошибка: {error}\n")
+
     def check_links(self):
         """
         Основной метод для проверки ссылок на указанных URL-адресах.
@@ -75,10 +67,6 @@ class LinkChecker:
         - Проходит по каждому URL-адресу и вызывает метод _process_page для обработки страницы.
         - Сохраняет данные о неработающих ссылках в Excel файл.
         """
-        stop_event = threading.Event()
-        animation_thread = threading.Thread(target=animate_search, args=(stop_event,))
-        animation_thread.start()
-
         try:
             with webdriver.Chrome(options=self.options) as browser:
                 for url in self.urls:
@@ -100,9 +88,6 @@ class LinkChecker:
             self.set_logs(error_message)
             error_text = f"Произошла ошибка: {e}.\nДанные об ошибке в файле error_logs.txt."
             print_slowly(error_text)
-        finally:
-            stop_event.set()
-            animation_thread.join()
 
     def _process_page(self, browser):
         """
@@ -110,12 +95,17 @@ class LinkChecker:
 
         Аргументы:
         browser (webdriver.Chrome): Экземпляр Chrome WebDriver.
+        url (str): URL текущей страницы.
 
         Описание:
         - Находит все ссылки на новости на текущей странице.
         - Для каждой новости вызывает метод _process_news для проверки ссылок внутри новости.
         - Проверяет наличие следующей страницы и переходит на нее, если она существует.
         """
+        stop_event = threading.Event()
+        animation_thread = threading.Thread(target=animate_search, args=(stop_event,))
+        animation_thread.start()
+
         while True:
             news_list = WebDriverWait(browser, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, "//div[@class='image']/a"))
@@ -139,12 +129,16 @@ class LinkChecker:
                     next_page_link.click()
                     WebDriverWait(browser, 10).until(EC.staleness_of(news_list[0]))
                 else:
-                    next_page_text = "Следующая страница не найдена, переход к следующей ссылке"
+                    stop_event.set()
+                    animation_thread.join()
+                    next_page_text = "Следующая страница не найдена, переход к следующей ссылке\n"
                     print_slowly(next_page_text)
                     break
             # pylint: disable=broad-exception-caught
             except Exception:
                 end_parsing_text = "Конец парсинга."
+                stop_event.set()
+                animation_thread.join()
                 print_slowly(end_parsing_text)
                 break
 
