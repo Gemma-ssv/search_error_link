@@ -30,7 +30,7 @@ def main():
     Возвращает:
         None: Функция ничего не возвращает, она только запускает процесс проверки.
     """
-    urls = []
+    urls = set()
     urls = print_choice(urls)
     checker = LinkChecker(urls)
 
